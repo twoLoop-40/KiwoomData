@@ -1,0 +1,92 @@
+[project]
+name = "kiwoomdata"
+version = "0.1.0"
+description = "Kiwoom Securities 20-year stock data collection system with formal specifications (Idris2-based)"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "Joonho Lee" }
+]
+dependencies = [
+    # Core data processing (Idris spec: Specs/Vector/)
+    "polars>=1.0.0",           # 10x faster than pandas (Rust-based)
+    "pandas>=2.2.0",           # Fallback for ta library
+    "pyarrow>=15.0.0",         # Parquet support (Specs/Sync/FileExport.idr)
+
+    # Kiwoom API (Specs/Collector/API.idr)
+    "pywin32>=311",            # Windows COM for Kiwoom OpenAPI (Python 3.13 support)
+
+    # Database (Specs/Database/)
+    "psycopg2-binary>=2.9.9",  # TimescaleDB client
+    "sqlalchemy>=2.0.0",       # ORM for schema management
+
+    # Vector database (Specs/Vector/Embedding.idr)
+    "pymilvus>=2.4.0",         # Milvus client for HNSW indexing
+
+    # Technical indicators (Specs/Vector/FeatureEngineering.idr)
+    "ta>=0.11.0",              # RSI, MACD, Bollinger Bands
+    "numpy>=1.26.0",
+
+    # Network & File transfer (Specs/Sync/NetworkTransfer.idr)
+    "paramiko>=3.4.0",         # SFTP with checksum verification
+
+    # Data validation (Specs/Validation/)
+    "pydantic>=2.6.0",         # Smart Constructor pattern implementation
+
+    # Utilities
+    "python-dotenv>=1.0.0",    # Environment variables
+    "loguru>=0.7.0",           # Better logging
+    "tqdm>=4.66.0",            # Progress bars
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "mypy>=1.8.0",
+    "ruff>=0.2.0",             # Fast linter & formatter
+    "ipython>=8.20.0",
+    "jupyter>=1.0.0",
+]
+
+backtesting = [
+    "vectorbt>=0.26.0",        # Backtesting framework
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kiwoomdata"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+]
+ignore = ["E501"]  # line too long (handled by formatter)
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
