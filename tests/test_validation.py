@@ -7,7 +7,7 @@ import polars as pl
 
 from kiwoomdata.core.types import OHLCV, Candle
 from kiwoomdata.core.error_types import ValidationError
-from kiwoomdata.validation.invariants import validate_candle
+from kiwoomdata.validation.invariants import validate_candle, get_raw_candle
 from kiwoomdata.validation.deduplication import DedupPolicy, Deduplicator
 
 
@@ -18,6 +18,23 @@ def test_validate_candle_success():
 
     valid_candle = validate_candle(candle)
     assert valid_candle is not None
+
+
+def test_get_raw_candle():
+    """Test unwrapping ValidCandle back to Candle"""
+    ohlcv = OHLCV(open_price=100, high_price=110, low_price=95, close_price=105, volume=1000)
+    candle = Candle(stock_code="005930", timestamp=1609459200000, ohlcv=ohlcv)
+
+    # Wrap
+    valid_candle = validate_candle(candle)
+
+    # Unwrap
+    unwrapped = get_raw_candle(valid_candle)
+
+    # Should be same candle (NewType is identity at runtime)
+    assert unwrapped == candle
+    assert unwrapped.stock_code == "005930"
+    assert unwrapped.ohlcv.open_price == 100
 
 
 def test_validate_candle_negative_price():

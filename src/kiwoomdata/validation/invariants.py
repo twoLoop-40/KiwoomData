@@ -86,5 +86,9 @@ def get_raw_candle(valid_candle: ValidCandle) -> Candle:
     Idris: getRaw : ValidCandle -> Candle
 
     This is the only way to unwrap a ValidCandle back to Candle.
+
+    Note: NewType is a type hint only. At runtime, ValidCandle(candle)
+    returns the candle unchanged, so unwrapping is just identity.
     """
-    return Candle.__wrapped__  # type: ignore
+    # NewType is erased at runtime, so valid_candle IS already a Candle
+    return valid_candle  # type: ignore[return-value]
