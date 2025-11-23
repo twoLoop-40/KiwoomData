@@ -104,7 +104,50 @@ Python Implementation (NEXT PHASE):
 
 
 ================================================================================
-Phase D: REST API Integration 💡 IDEA (DISCOVERED TODAY!)
+Phase D: Optimal Transport Re-ranking 📋 PLANNED (START HERE!)
+================================================================================
+
+GOAL: Improve vector search results using Optimal Transport distance
+
+Background:
+- Vector search (cosine similarity) gives initial candidates
+- OT re-ranks candidates using Earth Mover's Distance
+- Better captures shape similarity between time series patterns
+
+Architecture:
+[📋] Vector Search (Phase 1) → OT Re-ranking (Phase 2) → Final Results
+
+[📋] Research Optimal Transport for time series
+     - Sinkhorn algorithm (entropy-regularized OT)
+     - Python library: POT (Python Optimal Transport)
+     - Application to candlestick patterns
+
+[📋] Design Specs/Vector/OptimalTransport.idr
+     - Cost matrix computation
+     - Sinkhorn distance calculation
+     - Re-ranking algorithm specification
+
+[📋] Implement src/kiwoomdata/vector/ot_rerank.py
+     - compute_ot_distance(pattern1, pattern2) using POT library
+     - rerank_candidates(query, candidates, top_k)
+     - Integration with existing vector pipeline
+
+[📋] Add tests: tests/test_ot_rerank.py
+     - Test OT distance computation
+     - Compare OT vs cosine similarity rankings
+     - Performance benchmarks
+
+[📋] Update examples/demo_vector_pipeline.py
+     - Show before/after re-ranking
+     - Visualize similarity improvements
+
+Dependencies to install:
+- POT: pip install POT (Python Optimal Transport)
+- NumPy/SciPy for matrix operations
+
+
+================================================================================
+Phase E: Kiwoom REST API → Idris2 Dictionary 📋 PLANNED
 ================================================================================
 
 IMPORTANT DISCOVERY:
@@ -116,22 +159,97 @@ Architecture Change:
 [💡] BEFORE: Windows (OpenAPI) → Mac (Milvus + Backtesting)
 [💡] AFTER:  Mac (REST API + Milvus + Backtesting) - ALL IN ONE!
 
-Tasks (Future):
-[💡] Research Kiwoom REST API authentication (OAuth tokens)
-[💡] Design REST API client spec (Specs/API/RestClient.idr)
-[💡] Implement HTTP client (requests library)
-[💡] Compare REST API vs OpenAPI feature parity
-[💡] Migrate data collection to Mac
-[💡] Remove Windows dependency entirely (optional)
+NEW GOAL: Create KiwoomIdris - Formal API Specification Dictionary
+[📋] Research all Kiwoom REST API endpoints
+     - Authentication (OAuth 2.0, token management)
+     - Market data endpoints (OHLCV, real-time quotes)
+     - Order endpoints (buy/sell, cancel)
+     - Account endpoints (balance, positions)
+     - Rate limits and quotas
 
-Endpoints to explore:
-- POST /api/dostk/chart - Historical OHLCV data
-- Real-time streaming (WebSocket?)
-- Order placement (for live trading - CAREFUL!)
+[📋] Design Specs/API/Kiwoom/Endpoints.idr
+     - Endpoint catalog with types
+     - Request/Response schemas
+     - Error codes enumeration
+     - Rate limit specifications
+
+[📋] Design Specs/API/Kiwoom/Auth.idr
+     - OAuth flow state machine
+     - Token refresh logic
+     - Credential management
+
+[📋] Design Specs/API/Kiwoom/Client.idr
+     - HTTP client interface
+     - Request builder with type safety
+     - Response parser with validation
+
+[📋] Implement Python client: src/kiwoomdata/api/
+     - rest_client.py (HTTP requests)
+     - auth.py (OAuth handler)
+     - endpoints.py (typed endpoint functions)
+     - models.py (Pydantic request/response models)
+
+[📋] Create API documentation
+     - KiwoomIdris.md - Complete endpoint reference
+     - Usage examples
+     - Error handling guide
 
 
 ================================================================================
-Phase E: Production Deployment 📋 PLANNED
+Phase F: Paper Trading App 📋 PLANNED
+================================================================================
+
+GOAL: Real-time paper trading application with pattern matching
+
+Features:
+[📋] Real-time market data streaming
+     - Connect to Kiwoom REST API (or WebSocket)
+     - Live price updates
+     - Real-time pattern detection
+
+[📋] Pattern matching engine
+     - Vector search for similar historical patterns
+     - OT re-ranking for best matches
+     - Signal generation (Buy/Sell/Hold)
+
+[📋] Virtual portfolio management
+     - Paper trading account (no real money!)
+     - Position tracking
+     - Order execution simulation
+     - P&L calculation
+
+[📋] Risk management
+     - Stop-loss automation
+     - Take-profit automation
+     - Position sizing rules
+     - Maximum drawdown limits
+
+[📋] Web dashboard (optional)
+     - Live chart with pattern overlays
+     - Portfolio summary
+     - Trade history
+     - Performance metrics
+
+[📋] Specs/PaperTrading/Core.idr
+     - VirtualAccount type
+     - Order type (Market, Limit, Stop)
+     - OrderStatus (Pending, Filled, Cancelled)
+     - Portfolio state machine
+
+[📋] Implementation: src/kiwoomdata/papertrading/
+     - account.py (VirtualAccount class)
+     - order_manager.py (Order execution simulation)
+     - strategy_runner.py (Live pattern matching)
+     - dashboard.py (Streamlit or FastAPI)
+
+Safety Features:
+- ⚠️ NEVER connect to real trading API
+- ⚠️ Always use paper trading endpoints
+- ⚠️ Clear warnings in UI: "PAPER TRADING ONLY"
+
+
+================================================================================
+Phase G: Production Deployment 📋 PLANNED
 ================================================================================
 
 [📋] Milvus Setup on Mac
@@ -224,43 +342,59 @@ Key Decisions Made
 
 
 ================================================================================
-Next Session Tasks (Priority Order)
+Next Session Tasks (Priority Order) - UPDATED!
 ================================================================================
 
-1. [HIGH] Verify all Idris2 specs compile
-   - Fix any compilation errors
-   - Ensure imports work correctly
+1. [HIGH] Phase D: Optimal Transport Re-ranking (START HERE!)
+   - Research POT library (Python Optimal Transport)
+   - Design Specs/Vector/OptimalTransport.idr
+   - Implement ot_rerank.py with Sinkhorn algorithm
+   - Test OT distance vs cosine similarity
+   - Update demo_vector_pipeline.py
 
-2. [HIGH] Implement Phase C Python code
-   - Start with types.py (Position, Signal, Trade)
-   - Then engine.py (execute_signal, BacktestEngine)
-   - Finally metrics.py (PerformanceSummary)
+2. [HIGH] Phase C: Backtesting Implementation
+   - Implement types.py (Position, Signal, Trade)
+   - Implement engine.py (execute_signal, BacktestEngine)
+   - Implement metrics.py (PerformanceSummary)
+   - Write tests
+   - Create demo_backtesting.py
 
-3. [MEDIUM] Write Phase C tests
-   - Test state machine transitions
-   - Test Trade creation on position close
-   - Test Sharpe ratio with daily returns
+3. [MEDIUM] Phase E: Kiwoom REST API Research
+   - Study https://openapi.kiwoom.com/guide/apiguide?jobTpCode=07
+   - Create KiwoomIdris endpoint dictionary
+   - Design Specs/API/Kiwoom/*.idr
+   - Document all endpoints, auth flow, rate limits
 
-4. [MEDIUM] Create demo_backtesting.py
-   - Simple strategy example
-   - Performance report
+4. [MEDIUM] Phase F: Paper Trading App
+   - Design Specs/PaperTrading/Core.idr
+   - Implement virtual account management
+   - Create real-time pattern matching engine
+   - Build web dashboard (Streamlit)
 
-5. [LOW] Research Kiwoom REST API
-   - Authentication flow
-   - Available endpoints
-   - Rate limits
-
-6. [LOW] Update README with Phase C progress
+5. [LOW] Update README with new roadmap
+   - Add OT re-ranking section
+   - Add paper trading section
+   - Update architecture diagram
 
 
 ================================================================================
-Questions for User
+Questions for User (RESOLVED)
 ================================================================================
 
 Q1: Should we prioritize REST API research for Mac-native data collection?
-Q2: Do you want to keep Windows OpenAPI support, or migrate fully to REST API?
-Q3: For backtesting, should we implement Risk Management spec first, or go straight to Python?
-Q4: Any specific backtesting strategies you want to test first?
+A1: Yes, but AFTER Optimal Transport re-ranking (Phase E)
+
+Q2: Should we start with OT re-ranking or backtesting?
+A2: ✅ START WITH OPTIMAL TRANSPORT RE-RANKING (Phase D)
+
+Q3: What libraries to use for OT?
+A3: ✅ POT (Python Optimal Transport) with Sinkhorn algorithm
+
+Q4: Paper trading app needed?
+A4: ✅ YES - Phase F (after backtesting)
+
+Q5: Should we create KiwoomIdris API dictionary?
+A5: ✅ YES - Complete formal specification of all endpoints
 
 
 ================================================================================
